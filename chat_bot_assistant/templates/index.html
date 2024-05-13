@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Chatbot Service</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .chat-container { display: flex; flex-direction: column; padding: 10px; }
+    .message { padding: 5px; margin-bottom: 10px; border-radius: 5px; width: fit-content; }
+    .user-message { background-color: #bde0fe; align-self: end; }
+    .bot-message { background-color: #f7d4d6; align-self: start; }
+    input[type="text"] { flex-grow: 1; padding: 10px; }
+    button { padding: 10px; }
+</style>
+</head>
+<body>
+<div class="chat-container" id="chat-container">
+    <div class="message bot-message">챗봇 서비스 오신 걸 환영합니다.</div>
+</div>
+<div style="display: flex; padding: 10px;">
+
+    <input type="text" id="user-input" placeholder="원하는 질문을 해주세요." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()">질문하기</button>
+</div>
+
+<script>
+function sendMessage() {
+    var input = document.getElementById('user-input');
+    var message = input.value.trim();
+    var answer_count = document.getElementsByClassName('bot-message').length
+    var csrf_token = "{{ csrf_token }}";
+    if (message) {
+        displayMessage(message, 'user');
+        input.value = ''; // Clear input field
+        
+        // AJAX request to send data to server
+        $.ajax({
+            url: '/chat-test',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ message: message, answer_count : answer_count}),
+            headers: {'X-CSRFToken': csrf_token},
+            success: function(data) {
+                console.log(data["answer"])
+                displayMessage(data["answer"], 'bot')
+            },
+            error: function() {
+                displayMessage('Error in sending message', 'bot');
+            }
+        });
+    }
+}
+
+function displayMessage(message, sender) {
+    var container = document.getElementById('chat-container');
+    var messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', sender + '-message');
+    messageDiv.textContent = message;
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight; // Scroll to the bottom
+}
+
+function handleEnter(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+</script>
+</body>
+</html>
