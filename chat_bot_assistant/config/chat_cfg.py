@@ -15,6 +15,5 @@ instruction="\
             "
 model="gpt-3.5-turbo"
 
-
-# user thread path
-user_thread_path = "chat_bot_assistant/config/user_thread.py"
+# user session json path
+user_session_path = "chat_bot_assistant/data/user_session.json"
